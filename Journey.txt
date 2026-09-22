@@ -1,0 +1,104 @@
+First connected the database by adding the credential in the configuration
+and using the Dot env class to load the keys and value.
+
+
+
+
+Spring Data JPA (Repository)
+
+
+
+Spring data jpa gives you out of the box crud methods
+so that you dont need to write everything on your own
+
+basically we create interface so that it can extend Data JPA and for future operation
+we can get all the functions
+
+UserRepository extends JpaRepository(gets all the functions)
+
+then in service we can create userRepository(obj) and by "."
+we can access those function for crud.
+
+
+authentication Journey Document (22-9)
+
+//--------------------------------------------------------//
+Part 1: What is This System? (The Big Picture)
+Technical Definition: A stateless, enterprise-grade backend security layer built with Spring Boot, Spring Security, and JWT (JSON Web Tokens) that handles user registration, password hashing via BCrypt, and token-based API request authorization.
+
+Layman Explanation: Imagine building a high-security apartment building. Registration is where tenants get a background check and pick up their keys. Login is where they show their face, and the front desk gives them a special digital pass (a JWT token). The security filter is the bouncer at the elevator who checks that pass every single time a tenant tries to enter a floor.
+
+🏗️ Part 2: Step-by-Step Architecture & Codebase
+1. The Data Blueprints (DTOs and Entities)
+Technical:
+
+User: Entity class mapped to the database via Spring Data JPA.
+
+UserRegistrationDto & UserLoginDto: Data Transfer Objects annotated with Jakarta validation (@NotBlank, @Valid) to intercept invalid payloads before hitting business logic.
+
+Layman: These are the blank pre-printed forms customers fill out at the front desk. If someone leaves a form blank or writes gibberish, the receptionist tears it up immediately.
+
+2. The Database Interface (UserRepository)
+Technical: Extends JpaRepository<User, Long> with custom queries like existsByUserName and Optional<User> findByUserName(String userName).
+
+Layman: This is the master filing cabinet manager. When you ask them, "Do we have a tenant named John?" or "Find John's file," they go straight to the storage drawers and pull out the exact folder.
+
+3. The Business Logic & JWT Engine (UserService & JwtUtil)
+Technical:
+
+UserService handles registration (checking duplicates, encoding passwords with BCryptPasswordEncoder) and login (verifying passwords, invoking JwtUtil).
+
+JwtUtil utilizes JJWT (v0.12.5) to digitally sign, encode, and parse cryptographic tokens.
+
+Layman: This is the head chef and the digital stamp machine. The chef scrambles the password so no one can ever read it in plain text. Once login checks out, the machine stamps a cryptographic VIP pass (the token) that expires after a set time.
+
+4. The Controllers (AuthController)
+Technical: REST controller mapped to /api/auth utilizing ResponseEntity to return explicit HTTP status codes (201 Created, 200 OK) and JSON payloads.
+
+Layman: The front counter cashiers. They take the incoming customer orders, hand them to the kitchen, package the result into a neat delivery box, and stamp it with the correct status code.
+
+5. The Security Guard & Gatekeeper (JwtAuthenticationFilter & SecurityConfig)
+Technical:
+
+JwtAuthenticationFilter: Extends OncePerRequestFilter to intercept incoming headers, isolate the Bearer token, validate it, and register the authenticated user inside SecurityContextHolder.
+
+SecurityConfig: Disables CSRF for stateless APIs, configures a stateless session policy, marks /api/auth/** as public, and registers the filter.
+
+Layman: The bouncer and the master security rules. The rules state that anyone can walk up to the registration desk, but anywhere else in the building requires showing a valid VIP pass to the security guard standing at the door.
+
+💻 Summary Code Reference
+The Core Controller (AuthController.java)
+Java
+package com.deepanshu.helpdeks.controllers;
+
+import com.deepanshu.helpdeks.dto.UserLoginDto;
+import com.deepanshu.helpdeks.dto.UserRegistrationDto;
+import com.deepanshu.helpdeks.entities.User;
+import com.deepanshu.helpdeks.services.UserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    private final UserService userService;
+
+    @PostMapping("/register")
+    public ResponseEntity<User> registerUser(@Valid @RequestBody UserRegistrationDto userRegistrationDto) {
+        User registeredUser = userService.registerUser(userRegistrationDto);
+        return ResponseEntity.ok(registeredUser);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@Valid @RequestBody UserLoginDto userLoginDto) {
+        String token = userService.loginUser(userLoginDto);
+        return ResponseEntity.ok(token);
+    }
+}
+Created for the HelpDeks Project Architecture.
+
+//--------------------------------------------------------//
