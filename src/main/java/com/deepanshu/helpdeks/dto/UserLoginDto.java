@@ -2,14 +2,12 @@ package com.deepanshu.helpdeks.dto;
 
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor    // Generates a constructor with 0 arguments
+@AllArgsConstructor
 @Builder
 
 public class UserLoginDto {

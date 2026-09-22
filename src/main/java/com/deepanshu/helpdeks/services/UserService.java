@@ -11,7 +11,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Service
 @Getter
 @Setter
-@AllArgsConstructor
 @Builder
 @RequiredArgsConstructor
 
